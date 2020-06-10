@@ -1,0 +1,43 @@
+version: '3.4'
+
+services:
+  samba:
+    image: dperson/samba
+    environment:
+      TZ: 'EST5EDT'
+    networks:
+      - default
+    ports:
+      - "137:137/udp"
+      - "138:138/udp"
+      - "139:139/tcp"
+      - "445:445/tcp"
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    volumes:
+      - /mnt:/mnt:z
+      - /mnt2:/mnt2:z
+    command: '-s "Mount;/mnt" -s "cisco;/mnt2;yes;no;no;cisco" -u "cisco;football" -p -w "EXAMPLE.COM"'
+
+  printer-snmp:
+    image: elcolio/net-snmp
+    hostname: Xerox Workstation
+    command: snmpd -Lo -f -V -c /etc/snmp/snmpd.conf
+    container_name: printer-snmp
+    ports:
+      - "161:161/udp"
+    environment:
+      - SNMPOID_1=.1.3.6.1.2.1.1.5.0
+
+  printer-lpd:
+    image: 'bitnami/apache:latest'
+    ports:
+      - '9100:80'
+
+networks:
+  default:
+
